@@ -1,5 +1,5 @@
-{
-  "name": "indonesiadaily",
+﻿{
+  "name": "seputarjabar",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
@@ -10,3 +10,9 @@
     "generate": "node tools/generate.js"
   }
 }
+
+
+
+
+
+

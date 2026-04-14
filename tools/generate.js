@@ -3,12 +3,55 @@ const fs = require('fs');
 const path = require('path');
 const Handlebars = require('handlebars');
 
-const SHEETS_URL = process.env.SHEETS_URL || 'https://script.google.com/macros/s/AKfycbwxSv8HmShXP5nng9NTAVgnDgGtfzNCXh8liAgsUWjtTcvRC9KrXpr-ioWLGmultck0fw/exec';
+const SHEETS_URL = process.env.SHEETS_URL || 'https://script.google.com/macros/s/AKfycbw2SfGbp73DxRE54CJ7-THv0CA-cQwTQnISorQ6AxmMF_Fl_ueWyUMUDwsmkMXdVU5r7g/exec';
 
 const TEMPLATE_PATH = path.join(__dirname, 'template.html');
 const ARTICLES_JSON_PATH = path.resolve(__dirname, '../articles.json');
 const OUT_DIR = path.resolve(__dirname, '../article');
 const IMG_DIR = 'img';
+
+function generateComments(category) {
+  const commentSets = {
+    'Lingkungan': [
+      { name: 'Ibu Sari', date: '22 Oct 2025', text: 'Program yang sangat bagus! Anak saya jadi lebih tertarik belajar teknologi. Terima kasih mahasiswa UPI!', avatar: '../img/cewe1.jpg' },
+      { name: 'Dedi Hermawan', date: '22 Oct 2025', text: 'Literasi digital memang penting dimulai sejak dini. Salut untuk UPI Purwakarta yang peduli dengan pendidikan teknologi.', avatar: '../img/cowok2.jpg' },
+      { name: 'Guru Lina', date: '22 Oct 2025', text: 'Sebagai guru, saya sangat terbantu dengan adanya program ini. Siswa jadi lebih semangat belajar.', avatar: '../img/cewe3.jpg' },
+      { name: 'Pak Budi', date: '23 Oct 2025', text: 'Inisiatif Perhutani dalam penanaman pohon sangat menginspirasi. Mari kita jaga lingkungan bersama!', avatar: '../img/cowok4.jpg' }
+    ],
+    'Ekonomi': [
+      { name: 'Bu Rina', date: '22 Oct 2025', text: 'Sinergi antara Perhutani dan Kodim sangat positif untuk pemberdayaan ekonomi desa. Semoga bermanfaat bagi masyarakat.', avatar: '../img/cewe2.jpg' },
+      { name: 'Ahmad Santoso', date: '22 Oct 2025', text: 'Program pemberdayaan ekonomi seperti ini yang dibutuhkan desa-desa di Indonesia.', avatar: '../img/cowok3.jpg' },
+      { name: 'Siti Aminah', date: '22 Oct 2025', text: 'Terima kasih Perhutani atas dukungannya terhadap ekonomi lokal.', avatar: '../img/cewe4.jpg' },
+      { name: 'Pak Hadi', date: '23 Oct 2025', text: 'Kolaborasi yang baik antara perusahaan dan militer untuk kemajuan ekonomi.', avatar: '../img/cowok5.jpg' }
+    ],
+    'Hukum': [
+      { name: 'Dewi Lestari', date: '22 Oct 2025', text: 'Penegakan hukum yang tegas diperlukan untuk menjaga ketertiban masyarakat.', avatar: '../img/cewe5.jpg' },
+      { name: 'Rudi Hartono', date: '22 Oct 2025', text: 'Kasus seperti ini harus ditindaklanjuti dengan serius oleh pihak berwajib.', avatar: '../img/cowok1.jpg' },
+      { name: 'Maya Sari', date: '22 Oct 2025', text: 'Semoga keadilan dapat ditegakkan dalam kasus ini.', avatar: '../img/cewe2.jpg' },
+      { name: 'Bambang Susilo', date: '23 Oct 2025', text: 'Penghinaan terhadap suku dan budaya tidak boleh ditoleransi.', avatar: '../img/cowok3.jpg' }
+    ],
+    'Olahraga': [
+      { name: 'Rina Kartika', date: '22 Oct 2025', text: 'Persib Bandung selalu membuat fansnya bangga! Semangat terus!', avatar: '../img/cewe3.jpg' },
+      { name: 'Doni Prasetyo', date: '22 Oct 2025', text: 'Pemain baru Persib ini sangat potensial. Tunggu aksi debutnya!', avatar: '../img/cowok4.jpg' },
+      { name: 'Lisa Amelia', date: '22 Oct 2025', text: 'Pelatih Bojan punya visi yang bagus untuk Persib. Maju terus!', avatar: '../img/cewe5.jpg' },
+      { name: 'Agus Salim', date: '23 Oct 2025', text: 'Persib adalah kebanggaan Bandung. Tetap semangat!', avatar: '../img/cowok1.jpg' }
+    ],
+    'Pendidikan': [
+      { name: 'Ibu Sari', date: '22 Oct 2025', text: 'Program yang sangat bagus! Anak saya jadi lebih tertarik belajar teknologi. Terima kasih mahasiswa UPI!', avatar: '../img/cewe4.jpg' },
+      { name: 'Dedi Hermawan', date: '22 Oct 2025', text: 'Literasi digital memang penting dimulai sejak dini. Salut untuk UPI Purwakarta yang peduli dengan pendidikan teknologi.', avatar: '../img/cowok5.jpg' },
+      { name: 'Guru Lina', date: '22 Oct 2025', text: 'Sebagai guru, saya sangat terbantu dengan adanya program ini. Siswa jadi lebih semangat belajar.', avatar: '../img/cewe1.jpg' },
+      { name: 'Pak Rahman', date: '23 Oct 2025', text: 'Pendidikan teknologi sangat penting untuk masa depan anak-anak.', avatar: '../img/cowok2.jpg' }
+    ],
+    'default': [
+      { name: 'Warga Bandung', date: '22 Oct 2025', text: 'Berita yang sangat informatif. Terima kasih Bandung News!', avatar: '../img/cewe1.jpg' },
+      { name: 'Netizen', date: '22 Oct 2025', text: 'Artikel yang bagus, mudah dipahami dan menarik.', avatar: '../img/cowok2.jpg' },
+      { name: 'Pembaca Setia', date: '22 Oct 2025', text: 'Semoga berita positif seperti ini terus bertambah.', avatar: '../img/cewe3.jpg' },
+      { name: 'Anonim', date: '23 Oct 2025', text: 'Bagus sekali portal berita ini. Update terus ya!', avatar: '../img/cowok4.jpg' }
+    ]
+  };
+  
+  return commentSets[category] || commentSets['default'];
+}
 
 function toSlug(str) {
   if (!str) return 'unknown';
@@ -75,7 +118,7 @@ function extractFirstImage(content) {
   
   while ((match = imgRegex.exec(content)) !== null) {
     const src = match[1];
-    if (!src.includes('logo.png') && 
+    if (!src.includes('news-800x500-1.jpg') && 
         !src.includes('ads-') && 
         !src.includes('cewe') && 
         !src.includes('cowok') && 
@@ -85,7 +128,7 @@ function extractFirstImage(content) {
     }
   }
   
-  return 'img/logo.png';
+  return 'img/news-800x500-1.jpg';
 }
 
 function scanLocalArticles() {
@@ -94,6 +137,16 @@ function scanLocalArticles() {
   
   const files = fs.readdirSync(OUT_DIR).filter(f => f.endsWith('.html') && !f.endsWith('-f.html'));
   console.log(`📂 Found ${files.length} local HTML files in article/ folder`);
+  
+  // Load existing articles to preserve original categories
+  let existingArticles = [];
+  try {
+    if (fs.existsSync(ARTICLES_JSON_PATH)) {
+      existingArticles = JSON.parse(fs.readFileSync(ARTICLES_JSON_PATH, 'utf8'));
+    }
+  } catch (e) {
+    console.warn('⚠️  Could not read existing articles.json for category preservation');
+  }
   
   for (const file of files) {
     try {
@@ -116,17 +169,80 @@ function scanLocalArticles() {
       // Extract first image from content
       const imagePath = extractFirstImage(content);
       
+      // Try to preserve original category
+      let category = 'Local'; // Default fallback
+      
+      // First, try to extract from HTML content (from JavaScript variable)
+      const categoryMatch = content.match(/const currentCategory = ['"]([^'"]+)['"]/);
+      if (categoryMatch) {
+        category = categoryMatch[1];
+      } else {
+        // Try to infer category from title/content keywords
+        const titleLower = title.toLowerCase();
+        const contentLower = content.toLowerCase();
+        
+        // Priority: Education (most specific keywords)
+        if ((titleLower.includes('mahasiswa') || titleLower.includes('universitas') || 
+             titleLower.includes('siswa') || titleLower.includes('pkl') || 
+             titleLower.includes('pendidikan') || titleLower.includes('sekolah')) &&
+            !titleLower.includes('tanam') && !titleLower.includes('pohon') && 
+            !titleLower.includes('polri') && !titleLower.includes('tni')) {
+          category = 'Pendidikan';
+        } 
+        // Environment/Conservation
+        else if (titleLower.includes('tanam') || titleLower.includes('pohon') || 
+                 titleLower.includes('bibit') || titleLower.includes('penghijauan') ||
+                 titleLower.includes('reboisasi') || titleLower.includes('lingkungan') ||
+                 titleLower.includes('hutan') || titleLower.includes('alam') ||
+                 contentLower.includes('tanam') || contentLower.includes('pohon') ||
+                 contentLower.includes('bibit')) {
+          category = 'Lingkungan';
+        } 
+        // Security/Social
+        else if (titleLower.includes('tni') || titleLower.includes('polri') || 
+                 titleLower.includes('kodim') || titleLower.includes('dandim') ||
+                 titleLower.includes('keamanan') || titleLower.includes('patroli') ||
+                 titleLower.includes('mitigasi') || titleLower.includes('bencana') ||
+                 titleLower.includes('sinergi') || titleLower.includes('koordinasi') ||
+                 contentLower.includes('tni') || contentLower.includes('polri') ||
+                 contentLower.includes('keamanan')) {
+          category = 'Keamanan';
+        } 
+        // Economic
+        else if (titleLower.includes('umkm') || titleLower.includes('ekonomi') || 
+                 titleLower.includes('koperasi') || titleLower.includes('usaha') ||
+                 titleLower.includes('panen') || titleLower.includes('pertanian') ||
+                 contentLower.includes('umkm') || contentLower.includes('ekonomi') ||
+                 contentLower.includes('koperasi')) {
+          category = 'Ekonomi';
+        }
+        // Social/Community
+        else if (titleLower.includes('sosialisasi') || titleLower.includes('komunitas') ||
+                 titleLower.includes('masyarakat') || titleLower.includes('paguyuban') ||
+                 contentLower.includes('sosialisasi') || contentLower.includes('komunitas')) {
+          category = 'Sosial';
+        }
+        else {
+          // Fallback: try to find in existing articles.json (if not "Local")
+          const existingArticle = existingArticles.find(a => a.slug === slug);
+          if (existingArticle && existingArticle.category && existingArticle.category !== 'Local') {
+            category = existingArticle.category;
+          }
+        }
+      }
+      
       localArticles.push({
         title,
         excerpt,
-        category: 'Local',
+        category,
         date: new Date().toISOString().split('T')[0],
         image: imagePath,
         url: `article/${slug}.html`,
         slug,
-        isLocal: true
+        isLocal: true,
+        comments: generateComments(category)
       });
-      console.log(`   📄 ${slug} (image: ${imagePath})`);
+      console.log(`   📄 ${slug} (category: ${category}, image: ${imagePath})`);
     } catch (err) {
       console.warn(`   ⚠️  Error reading ${file}:`, err.message);
     }
@@ -224,6 +340,7 @@ async function generateArticles() {
           content,
           author: row.author || '',
           excerpt: row.excerpt || content.replace(/<[^>]*>/g, '').substring(0, 150),
+          comments: generateComments(row.category || row.badge || 'News'),
           slug
         };
 
@@ -292,8 +409,8 @@ async function generateArticles() {
     console.log(`   ✨ New: ${newCount}`);
     console.log(`   🔄 Updated: ${updateCount}`);
     console.log(`   ⏭️  Skipped: ${skipCount}`);
-    console.log(`   � Local preserved: ${localPreserved}`);
-    console.log(`   �🗑️  Deleted: ${removed.length}`);
+    console.log(`     Local preserved: ${localPreserved}`);
+    console.log(`    🗑️  Deleted: ${removed.length}`);
     console.log(`   📁 Total: ${existingArticles.length}`);
     console.log(`\n✅ Done!`);
   } catch (err) {
