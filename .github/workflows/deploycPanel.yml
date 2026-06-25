@@ -26,7 +26,7 @@ jobs:
       - name: Run static generator
         run: node tools/generate.js
 
-      - name: Deploy via FTP
+      - name: Deploy via FTP (only changed files)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: 195.88.211.226
@@ -34,9 +34,10 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
           protocol: ftp
-          local-dir: ./  # atau ./ jika ingin upload semua
+          local-dir: ./
           server-dir: /seputarjabar/
-          timeout: 500000
+          state-name: .ftp-deploy-sync-state.json
+          timeout: 600000
           dangerous-clean-slate: false
           exclude: |
             **/.git*
@@ -49,10 +50,10 @@ jobs:
             .env
             .env.local
             *.log
-            TROUBLESHOOTING.md
-            AUDIT_REPORT.md
-            PERBAIKAN_STATUS.md
-            final-verification.ps1
-            fix-encoding.ps1
-            rebrand-to-warta-janten.ps1
-            replace-logo.ps1
+            *.ps1
+            *.md
+            tools/**
+            lib/**
+            scripts/**
+            rebrand_*.ipynb
+            **/Thumbs.db
